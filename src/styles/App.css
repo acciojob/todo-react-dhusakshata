@@ -1,1 +1,26 @@
 
+body
+{
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+
+
+.todo-container
+{
+    display: flex;
+    flex-direction: column;
+}
+.item-container
+{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+button
+{
+    width: fit-content;
+    height: fit-content;
+}
