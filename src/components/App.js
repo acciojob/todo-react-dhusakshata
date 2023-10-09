@@ -1,60 +1,80 @@
+import { useReducer } from 'react';
+import AddTask from './AddTask.js';
+import TaskList from './TaskList.js';
 
-import React, { useState } from "react";
-import './../styles/App.css';
-
-const App = () => {
-
-  const [inputVal, setInputVal] = useState("");
-  const [list, setList] = useState([]);
-
-  const handleInputVal = (e) => {
-    console.log(inputVal);
-    setInputVal(e.target.value);
-  }
-
-  const handleAddTodoBtn = () => {
-    if (inputVal) {
-      const newList = [...list, inputVal]; // Create a new array with the updated data
-      setList(newList); // Update the state with the new array
-      setInputVal(""); // Clear the input field
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case 'added': {
+      return [...tasks, {
+        id: action.id,
+        text: action.text,
+        done: false
+      }];
     }
-    
+    case 'changed': {
+      return tasks.map(t => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    case 'deleted': {
+      return tasks.filter(t => t.id !== action.id);
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+
+export default function TaskApp() {
+  const [tasks, dispatch] = useReducer(
+    tasksReducer,
+    initialTasks
+  );
+
+  function handleAddTask(text) {
+    dispatch({
+      type: 'added',
+      id: nextId++,
+      text: text,
+    });
   }
 
-  const handleDelete = (index) => {
-    // Create a new array excluding the todo item to delete
-    const updatedList = list.filter((item, i) => i !== index);
-    setList(updatedList);
+  function handleChangeTask(task) {
+    dispatch({
+      type: 'changed',
+      task: task
+    });
+  }
+
+  function handleDeleteTask(taskId) {
+    dispatch({
+      type: 'deleted',
+      id: taskId
+    });
   }
 
   return (
-    <div className="main-div">
-        <h1 className="h1">To Do List</h1>
-          <div className="input-box">
-                <input
-                className="input"
-                type="text"
-                onChange={handleInputVal}
-                value={inputVal}
-                />
-                <button 
-                className="btn"
-                onClick={handleAddTodoBtn}>Add Todo</button>
-          </div>
-          <ul className="doto-container">
-             {
-               list.map((listItem, index) => {
-                return (
-                  <li className='todolist-container'>
-                      <p>{listItem}</p>
-                      <button onClick={() => handleDelete(index)}>Delete</button>
-                  </li>
-                )
-              })
-            }
-          </ul>
-    </div>
-  )
+    <>
+      <h1>Prague itinerary</h1>
+      <AddTask
+        onAddTask={handleAddTask}
+      />
+      <TaskList
+        tasks={tasks}
+        onChangeTask={handleChangeTask}
+        onDeleteTask={handleDeleteTask}
+      />
+    </>
+  );
 }
 
-export default App
+let nextId = 3;
+const initialTasks = [
+  { id: 0, text: 'Visit Kafka Museum', done: true },
+  { id: 1, text: 'Watch a puppet show', done: false },
+  { id: 2, text: 'Lennon Wall pic', done: false }
+];
